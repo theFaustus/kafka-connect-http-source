@@ -69,7 +69,6 @@ public class HttpSourceTask extends SourceTask {
             this.topic = config.getString(HttpSourceConfig.TOPIC);
 
             this.apiClient = new HttpApiClient(config);
-            this.apiClient.start();
 
             this.sourcePartition = Collections.singletonMap("url", this.url);
             this.sourceOffset = context.offsetStorageReader().offset(this.sourcePartition);

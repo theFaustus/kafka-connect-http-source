@@ -65,20 +65,11 @@ public class HttpApiClient implements AutoCloseable {
         this.authBearer = config.getPassword(HttpSourceConfig.HTTP_AUTH_BEARER).value();
         this.connectTimeoutMs = config.getInt(HttpSourceConfig.HTTP_CONNECT_TIMEOUT_MS);
         this.readTimeoutMs = config.getInt(HttpSourceConfig.HTTP_READ_TIMEOUT_MS);
-    }
-
-    /**
-     * Creates and starts the underlying HTTP client.
-     * This method should be called once before making any requests.
-     */
-    public void start() {
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
-                .setResponseTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
-                .build();
-
         this.httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
+                        .setResponseTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
+                        .build())
                 .build();
     }
 
@@ -176,11 +167,12 @@ public class HttpApiClient implements AutoCloseable {
 
         return new URI(sb.toString());
     }
+
     /**
      * Adds custom headers from a comma-separated string to the request.
      * Headers are expected in the format "HeaderName=Value,AnotherHeader=AnotherValue".
      *
-     * @param request      The request object to add headers to.
+     * @param request The request object to add headers to.
      */
     private void addHeaders(HttpUriRequestBase request) {
         if (headers == null || headers.isEmpty()) {
@@ -200,7 +192,7 @@ public class HttpApiClient implements AutoCloseable {
     /**
      * Adds authentication headers (Bearer or Basic) to the request based on configuration.
      *
-     * @param request     The request object.
+     * @param request The request object.
      */
     private void addAuth(HttpUriRequestBase request) {
         if (authBearer != null && !authBearer.isEmpty()) {
