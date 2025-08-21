@@ -16,7 +16,7 @@ This is a very simple Kafka Connect source connector that polls a configurable H
 ## Prerequisites 🛠️
 
 * Apache Kafka and Kafka Connect
-* Java 11 or higher
+* Java 11
 * Maven
 
 -----
