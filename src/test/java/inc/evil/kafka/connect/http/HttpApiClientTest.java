@@ -42,6 +42,8 @@ public class HttpApiClientTest {
     private static class DummyConfig extends AbstractConfig {
         public DummyConfig(Map<String, String> originalProps) {
             super(new ConfigDef()
+                            .define("http.proxy.host", ConfigDef.Type.STRING, "", ConfigDef.Importance.LOW, "HTTP proxy host")
+                            .define("http.proxy.port", ConfigDef.Type.INT, -1, ConfigDef.Importance.LOW, "HTTP proxy port")
                             .define("http.query.params", ConfigDef.Type.STRING, "", ConfigDef.Importance.LOW, "HTTP query parameters")
                             .define("http.request.body", ConfigDef.Type.STRING, "", ConfigDef.Importance.LOW, "HTTP request body")
                             .define("http.headers", ConfigDef.Type.STRING, "", ConfigDef.Importance.LOW, "HTTP headers")

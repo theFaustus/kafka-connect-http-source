@@ -12,6 +12,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.Method;
 import org.apache.hc.core5.http.ParseException;
@@ -46,6 +47,8 @@ public class HttpApiClient implements AutoCloseable {
     private final String authUsername;
     private final String authPassword;
     private final String authBearer;
+    private final String proxyHost;
+    private final int proxyPort;
     private final int connectTimeoutMs;
     private final int readTimeoutMs;
 
@@ -65,11 +68,19 @@ public class HttpApiClient implements AutoCloseable {
         this.authBearer = config.getPassword(HttpSourceConfig.HTTP_AUTH_BEARER).value();
         this.connectTimeoutMs = config.getInt(HttpSourceConfig.HTTP_CONNECT_TIMEOUT_MS);
         this.readTimeoutMs = config.getInt(HttpSourceConfig.HTTP_READ_TIMEOUT_MS);
+        RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
+                .setConnectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
+                .setResponseTimeout(readTimeoutMs, TimeUnit.MILLISECONDS);
+
+        this.proxyHost = config.getString(HttpSourceConfig.HTTP_PROXY_HOST);
+        this.proxyPort = config.getInt(HttpSourceConfig.HTTP_PROXY_PORT);
+        if (proxyHost != null && !proxyHost.isEmpty() && proxyPort > 0) {
+            HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+            requestConfigBuilder.setProxy(proxy);
+        }
+
         this.httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
-                        .setResponseTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
-                        .build())
+                .setDefaultRequestConfig(requestConfigBuilder.build())
                 .build();
     }
 

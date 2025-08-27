@@ -18,6 +18,8 @@ public class HttpSourceConfig extends AbstractConfig {
     public static final String HTTP_AUTH_BEARER = "http.auth.bearer";
     public static final String HTTP_CONNECT_TIMEOUT_MS = "http.connect.timeout.ms";
     public static final String HTTP_READ_TIMEOUT_MS = "http.read.timeout.ms";
+    public static final String HTTP_PROXY_HOST = "http.proxy.host";
+    public static final String HTTP_PROXY_PORT = "http.proxy.port";
     public static final String TOPIC = "topic";
     public static final String VERSION = "1.0";
 
@@ -97,7 +99,17 @@ public class HttpSourceConfig extends AbstractConfig {
                         10000,
                         ConfigDef.Range.atLeast(1000),
                         ConfigDef.Importance.MEDIUM,
-                        "Timeout in milliseconds for reading the HTTP response. Default is 10000 ms.");
+                        "Timeout in milliseconds for reading the HTTP response. Default is 10000 ms.")
+                .define(HTTP_PROXY_HOST,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.MEDIUM,
+                        "Optional HTTP proxy host to route requests through.")
+                .define(HTTP_PROXY_PORT,
+                        ConfigDef.Type.INT,
+                        -1,
+                        ConfigDef.Importance.MEDIUM,
+                        "Optional HTTP proxy port. Must be set if http.proxy.host is provided.");
     }
 
     public HttpSourceConfig(Map<String, String> originals) {

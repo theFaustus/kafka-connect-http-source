@@ -6,6 +6,7 @@ This is a very simple Kafka Connect source connector that polls a configurable H
 
 * **Configurable HTTP method:** Supports GET, POST, PUT, PATCH, and DELETE.
 * **Customizable headers and query parameters:** Allows you to pass additional information with your requests.
+* **Proxy support:** Allows you to pass proxy host and port if needed.
 * **Authentication options:** Supports Basic Authentication and Bearer tokens.
 * **Timeout management:** Configure connection and read timeouts to prevent long-running requests.
 * **Polling interval:** Sets a frequency for fetching new data.
@@ -63,16 +64,18 @@ Create a new instance of the connector using the REST API. Modify the `config` b
     curl -X POST http://localhost:3030/api/kafka-connect/connectors \
       -H "Content-Type: application/json" \
       -d '{
-        "name": "kafka-connect-http",
+        "name": "my-connector",
         "config": {
           "connector.class": "inc.evil.kafka.connect.http.HttpSourceConnector",
           "http.headers": "Content-Type=application/json",
           "tasks.max": "1",
           "http.query.params": "random=123",
+          "http.proxy.host": "https://foo.com",
+          "http.proxy.port": "1234",
           "http.url": "https://httpbin.org/get",
           "http.read.timeout.ms": "10000",
-          "topic": "test-topic",
-          "http.poll.interval.ms": "30000",
+          "topic": "my-topic",
+          "http.poll.interval.ms": "10000",
           "http.connect.timeout.ms": "5000",
           "http.method": "GET",
           "value.converter": "org.apache.kafka.connect.storage.StringConverter",
@@ -117,17 +120,19 @@ To see all active connectors use the following command.
 
 ## Configuration Options ⚙️
 
-| Name | Type | Importance | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `topic` | `STRING` | `HIGH` | N/A | The Kafka topic to write the fetched data to. |
-| `http.url` | `STRING` | `HIGH` | `"https://httpbin.org/get"` | The base HTTP URL to fetch data from. |
-| `http.poll.interval.ms` | `INT` | `HIGH` | `60000` | Polling interval in milliseconds between consecutive HTTP requests. Minimum allowed is 5000 ms. |
-| `http.method` | `STRING` | `HIGH` | `GET` | The HTTP method to use for requests. Valid values are `GET`, `POST`, `PATCH`, `PUT`, `DELETE`. |
-| `http.connect.timeout.ms` | `INT` | `MEDIUM` | `5000` | Timeout in milliseconds for establishing the HTTP connection. |
-| `http.read.timeout.ms` | `INT` | `MEDIUM` | `10000` | Timeout in milliseconds for reading the HTTP response. |
-| `http.headers` | `STRING` | `LOW` | `""` | Optional HTTP request headers in 'key=value' pairs separated by commas. |
-| `http.query.params` | `STRING` | `LOW` | `""` | Optional query parameters appended to the HTTP request URL in 'key=value' pairs separated by '&'. |
-| `http.request.body` | `STRING` | `MEDIUM` | `""` | The HTTP request body to be sent with the request. Only applicable for methods like POST and PUT. |
-| `http.auth.username` | `STRING` | `MEDIUM` | `""` | Username for HTTP Basic Authentication. Used with `http.auth.password`. |
-| `http.auth.password` | `PASSWORD` | `MEDIUM` | `""` | Password for HTTP Basic Authentication. Used with `http.auth.username`. |
-| `http.auth.bearer` | `PASSWORD` | `MEDIUM` | `""` | Bearer token for the Authorization header. |
+| Name                      | Type        | Importance | Default                       | Description                                                                                        |
+|:--------------------------|:------------|:-----------|:------------------------------|:---------------------------------------------------------------------------------------------------|
+| `topic`                   | `STRING`    | `HIGH`     | N/A                           | The Kafka topic to write the fetched data to.                                                      |
+| `http.url`                | `STRING`    | `HIGH`     | `"https://httpbin.org/get"`   | The base HTTP URL to fetch data from.                                                              |
+| `http.proxy.host`         | `STRING`    | `MEDIUM`   | `""`                          | Optional HTTP proxy host to route requests through.                                                |
+| `http.proxy.port`         | `INT`       | `MEDIUM`   | `-1`                          | Optional HTTP proxy port. Must be set if `http.proxy.host` is provided.                            |
+| `http.poll.interval.ms`   | `INT`       | `HIGH`     | `60000`                       | Polling interval in milliseconds between consecutive HTTP requests. Minimum allowed is 5000 ms.    |
+| `http.method`             | `STRING`    | `HIGH`     | `GET`                         | The HTTP method to use for requests. Valid values are `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.     |
+| `http.connect.timeout.ms` | `INT`       | `MEDIUM`   | `5000`                        | Timeout in milliseconds for establishing the HTTP connection.                                      |
+| `http.read.timeout.ms`    | `INT`       | `MEDIUM`   | `10000`                       | Timeout in milliseconds for reading the HTTP response.                                             |
+| `http.headers`            | `STRING`    | `LOW`      | `""`                          | Optional HTTP request headers in 'key=value' pairs separated by commas.                            |
+| `http.query.params`       | `STRING`    | `LOW`      | `""`                          | Optional query parameters appended to the HTTP request URL in 'key=value' pairs separated by '&'.  |
+| `http.request.body`       | `STRING`    | `MEDIUM`   | `""`                          | The HTTP request body to be sent with the request. Only applicable for methods like POST and PUT.  |
+| `http.auth.username`      | `STRING`    | `MEDIUM`   | `""`                          | Username for HTTP Basic Authentication. Used with `http.auth.password`.                            |
+| `http.auth.password`      | `PASSWORD`  | `MEDIUM`   | `""`                          | Password for HTTP Basic Authentication. Used with `http.auth.username`.                            |
+| `http.auth.bearer`        | `PASSWORD`  | `MEDIUM`   | `""`                          | Bearer token for the Authorization header.                                                         |
